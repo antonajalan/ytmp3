@@ -1,16 +1,19 @@
 FROM node:24-bookworm-slim
 
 RUN apt-get update \
- && apt-get install -y --no-install-recommends python3 curl ca-certificates \
- && curl -fsSL https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp \
-    -o /usr/local/bin/yt-dlp \
- && chmod +x /usr/local/bin/yt-dlp \
+ && apt-get install -y --no-install-recommends python3 python3-venv \
+ && python3 -m venv /opt/venv \
+ && /opt/venv/bin/pip install --upgrade pip \
+ && /opt/venv/bin/pip install --pre "yt-dlp[default]" \
+ && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
+
+ENV PATH="/opt/venv/bin:$PATH"
 
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm install
+RUN npm install --omit=dev
 
 COPY . .
 
